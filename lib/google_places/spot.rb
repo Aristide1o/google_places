@@ -305,7 +305,7 @@ module GooglePlaces
       @photos                     = photos_component(json_result_object['photos'])
       @reviews                    = reviews_component(json_result_object['reviews'])
       @nextpagetoken              = json_result_object['nextpagetoken']
-      @price_level                = json_result_object['price_level'] 
+      @price_level                = json_result_object['price_level'].to_i
       @events                     = events_component(json_result_object['events'])
     end
 
