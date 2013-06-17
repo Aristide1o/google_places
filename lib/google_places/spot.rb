@@ -2,7 +2,7 @@ require 'google_places/review'
 
 module GooglePlaces
   class Spot
-    attr_accessor :lat, :lng, :name, :icon, :reference, :vicinity, :types, :id, :formatted_phone_number, :international_phone_number, :formatted_address, :address_components, :street_number, :street, :city, :region, :postal_code, :country, :rating, :url, :cid, :website, :reviews, :aspects, :zagat_selected, :zagat_reviewed, :photos, :review_summary, :nextpagetoken
+    attr_accessor :lat, :lng, :name, :icon, :reference, :vicinity, :types, :id, :formatted_phone_number, :international_phone_number, :formatted_address, :address_components, :street_number, :street, :city, :region, :postal_code, :country, :rating, :url, :cid, :website, :reviews, :aspects, :zagat_selected, :zagat_reviewed, :photos, :review_summary, :nextpagetoken, :price_level, :events
 
     # Search for Spots at the provided location
     #
@@ -305,6 +305,8 @@ module GooglePlaces
       @photos                     = photos_component(json_result_object['photos'])
       @reviews                    = reviews_component(json_result_object['reviews'])
       @nextpagetoken              = json_result_object['nextpagetoken']
+      @price_level                = json_result_object['price_level'] 
+      @events                     = events_component(json_result_object['events'])
     end
 
     def address_component(address_component_type, address_component_length)
@@ -327,6 +329,20 @@ module GooglePlaces
               r['author_url'],
               r['text'],
               r['time'].to_i
+          )
+        }
+      else []
+      end
+    end
+
+    def events_component(json_events)
+      if json_events
+        json_events.map { |r|
+          Event.new(
+              r['review_id'],
+              r['start_time'].to_i,
+              r['summary'],
+              r['url'].to_i
           )
         }
       else []
