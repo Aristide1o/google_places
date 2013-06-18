@@ -1,8 +1,6 @@
-require 'google_places/review'
-
 module GooglePlaces
   class Spot
-    attr_accessor :lat, :lng, :name, :icon, :reference, :vicinity, :types, :id, :formatted_phone_number, :international_phone_number, :formatted_address, :address_components, :street_number, :street, :city, :region, :postal_code, :country, :rating, :url, :cid, :website, :reviews, :aspects, :zagat_selected, :zagat_reviewed, :photos, :review_summary, :nextpagetoken, :price_level, :events
+    attr_accessor :lat, :lng, :name, :icon, :reference, :vicinity, :types, :id, :formatted_phone_number, :international_phone_number, :formatted_address, :address_components, :street_number, :street, :city, :region, :postal_code, :country, :rating, :url, :cid, :website, :reviews, :aspects, :zagat_selected, :zagat_reviewed, :photos, :review_summary, :nextpagetoken, :price_level, :events, :is_open_now, :periods
 
     # Search for Spots at the provided location
     #
@@ -307,6 +305,8 @@ module GooglePlaces
       @nextpagetoken              = json_result_object['nextpagetoken']
       @price_level                = json_result_object['price_level'].to_i
       @events                     = events_component(json_result_object['events'])
+      @is_open_now                = json_result_object['opening_hours']['open_now']
+      @periods                    = periods_component(json_result_object['opening_hours']['periods'])
     end
 
     def address_component(address_component_type, address_component_length)
@@ -337,12 +337,25 @@ module GooglePlaces
 
     def events_component(json_events)
       if json_events
-        json_events.map { |r|
+        json_events.map { |evt|
           Event.new(
-              r['review_id'],
-              r['start_time'].to_i,
-              r['summary'],
-              r['url'].to_i
+              evt['event_id'],
+              evt['start_time'].to_i,
+              evt['summary'],
+              evt['url'].to_i
+          )
+        }
+      else []
+      end
+    end
+
+    def periods_component(json_periods)
+      if json_periods
+        json_periods.map { |p|
+          Period.new(
+              p['open']['day'].to_i,
+              p['open']['time'].to_i,
+              p['close']['time'].to_i
           )
         }
       else []
