@@ -305,8 +305,8 @@ module GooglePlaces
       @nextpagetoken              = json_result_object['nextpagetoken']
       @price_level                = json_result_object['price_level'].to_i
       @events                     = events_component(json_result_object['events'])
-      @is_open_now                = json_result_object['opening_hours'] ? ['open_now'] : nil
-      @periods                    = periods_component(json_result_object['opening_hours'] ? ['periods'] : nil)
+      @is_open_now                = json_result_object['opening_hours'] ? json_result_object['opening_hours']['open_now'] : nil
+      @periods                    = periods_component(json_result_object['opening_hours'] ? json_result_object['opening_hours']['periods'] : nil)
     end
 
     def address_component(address_component_type, address_component_length)
