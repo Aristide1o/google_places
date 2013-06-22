@@ -355,7 +355,7 @@ module GooglePlaces
           Period.new(
               p['open']['day'].to_i,
               p['open']['time'].to_i,
-              p['close']['time'].to_i
+              p['close'] ? p['close']['time'].to_i : nil # Some places do not have a closing time
           )
         }
       else []
