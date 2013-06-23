@@ -205,8 +205,8 @@ module GooglePlaces
     #   as well as customer reviews and other third-party content.
     #
     # @see https://developers.google.com/maps/documentation/places/supported_types List of supported types 
-    def spots(lat, lng, options = {})
-      Spot.list(lat, lng, @api_key, @sensor, @options.merge(options))
+    def spots_radar(lat, lng, options = {})
+      Spot.list_radar(lat, lng, @api_key, @sensor, @options.merge(options))
     end
 
   end
