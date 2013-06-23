@@ -230,6 +230,56 @@ module GooglePlaces
       request(:spots_by_query, multipage_request, exclude, options)
     end
 
+    # Search for Spots at the provided location
+    #
+    # @return [Array<Spot>]
+    # @param [String,Integer] lat the latitude for the search
+    # @param [String,Integer] lng the longitude for the search
+    # @param [String] api_key the provided api key
+    # @param [Boolean] sensor
+    #   Indicates whether or not the Place request came from a device using a location sensor (e.g. a GPS) to determine the location sent in this request.
+    #   <b>Note that this is a mandatory parameter</b>
+    # @param [Hash] options
+    # @option options [Integer] :radius (1000)
+    #   Defines the distance (in meters) within which to return Place results.
+    #   The maximum allowed radius is 50,000 meters.
+    #   <b>Note that this is a mandatory parameter</b>
+    # @option options [String,Array] :types (%w(accounting airportamusement_park aquarium art_gallery atm bakery bank bar beauty_salon bicycle_store book_store bowling_alley bus_station cafe campground car_dealer car_rental car_repair car_wash casino cemetery church city_hall clothing_store convenience_store courthouse dentist department_store doctor electrician electronics_store embassy establishment finance fire_station florist food funeral_home furniture_store gas_station general_contractor grocery_or_supermarket gym hair_care hardware_store health hindu_temple home_goods_store hospital insurance_agency jewelry_storelaundry lawyer library liquor_store local_government_office locksmith lodging meal_delivery meal_takeaway mosque movie_rental movie_theater moving_company museum night_club painter park parking pet_store pharmacy physiotherapist place_of_worship plumber police post_office real_estate_agency restaurant roofing_contractor rv_park school shoe_store shopping_mall spa stadium storage store subway_station synagogue taxi_stand train_station travel_agency university veterinary_care zoo administrative_area_level_1 administrative_area_level_2 administrative_area_level_3 colloquial_area country floor geocode intersection localitynatural_feature neighborhood political point_of_interest post_box postal_code postal_code_prefix postal_town premise room route street_address street_number sublocality sublocality_level_4 sublocality_level_5 sublocality_level_3 sublocality_level_2 sublocality_level_1 subpremise transit_station))
+    #   Restricts the results to Spots matching at least one of the specified types
+    # @option options [String] :name
+    #   A term to be matched against the names of Places.
+    #   Results will be restricted to those containing the passed name value.
+    # @option options [String] :keyword
+    #   A term to be matched against all content that Google has indexed for this Spot,
+    #   including but not limited to name, type, and address,
+    #   as well as customer reviews and other third-party content.
+    #
+    # @see https://developers.google.com/maps/documentation/places/supported_types List of supported types
+    def self.list_radar(lat, lng, api_key, sensor, options = {})
+      location = Location.new(lat, lng)
+      radius = options.delete(:radius) || 1000
+      types  = options.delete(:types) ||  (%w(accounting airportamusement_park aquarium art_gallery atm bakery bank bar beauty_salon bicycle_store book_store bowling_alley bus_station cafe campground car_dealer car_rental car_repair car_wash casino cemetery church city_hall clothing_store convenience_store courthouse dentist department_store doctor electrician electronics_store embassy establishment finance fire_station florist food funeral_home furniture_store gas_station general_contractor grocery_or_supermarket gym hair_care hardware_store health hindu_temple home_goods_store hospital insurance_agency jewelry_storelaundry lawyer library liquor_store local_government_office locksmith lodging meal_delivery meal_takeaway mosque movie_rental movie_theater moving_company museum night_club painter park parking pet_store pharmacy physiotherapist place_of_worship plumber police post_office real_estate_agency restaurant roofing_contractor rv_park school shoe_store shopping_mall spa stadium storage store subway_station synagogue taxi_stand train_station travel_agency university veterinary_care zoo administrative_area_level_1 administrative_area_level_2 administrative_area_level_3 colloquial_area country floor geocode intersection localitynatural_feature neighborhood political point_of_interest post_box postal_code postal_code_prefix postal_town premise room route street_address street_number sublocality sublocality_level_4 sublocality_level_5 sublocality_level_3 sublocality_level_2 sublocality_level_1 subpremise transit_station))
+      name  = options.delete(:name)
+      keyword = options.delete(:keyword)
+
+      options = {
+        :location => location.format,
+        :radius => radius,
+        :sensor => sensor,
+        :key => api_key,
+        :name => name,
+        :keyword => keyword
+      }
+
+      # Accept Types as a string or array
+      if types
+        types = (types.is_a?(Array) ? types.join('|') : types)
+        options.merge!(:types => types)
+      end
+
+      request_radar(:spots_radar, options)
+    end
+
     def self.request(method, multipage_request, exclude, options)
       results = []
 
@@ -269,6 +319,17 @@ module GooglePlaces
         end
 
       end while (next_page)
+    end
+
+    def self.request_radar(method, options)
+      results = []
+
+      response = Request.send(method, options)
+      response['results'].each do |result|
+        results << self.new(result)
+      end
+
+      results
     end
 
     # @param [JSON] json_result_object a JSON object to create a Spot from
