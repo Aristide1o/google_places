@@ -429,7 +429,7 @@ module GooglePlaces
     end
 
     def photos_component(json_photos)
-      json_photos.to_a.map{ |r| { :width => r['width'], :height => r['height'], :width => r['width'], :photo_reference => r['photo_reference'], :html_attributions => r['html_attributions'] } }
+      json_photos.to_a.map{ |r| {:height => r['height'], :width => r['width'], :photo_reference => r['photo_reference'], :html_attributions => r['html_attributions'] } }
     end
   end
 end
